@@ -4,6 +4,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
 
 public class OrganizationCreatePage {
 
@@ -35,20 +38,20 @@ public class OrganizationCreatePage {
 	public WebElement getMailId() {
 		return mailId;
 	}
+
 	/**
-	 * 
-	 * @param name
-	 * @param PhoneNum
-	 * @param email
+	 * Method to fill and save organization data
+	 * @param driver - WebDriver instance
+	 * @param name - Organization name
+	 * @param PhoneNum - Phone number
+	 * @param email - Email ID
 	 */
-	public void enterOrgnaizationData(String name,String PhoneNum,String email)
-	
-	{
+	public void enterOrgnaizationData(WebDriver driver, String name, String PhoneNum, String email) {
 		orgName.sendKeys(name);
 		phnNum.sendKeys(PhoneNum);
 		mailId.sendKeys(email);
-		saveButton.click();
+
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.elementToBeClickable(saveButton)).click();
 	}
-	
-	
 }

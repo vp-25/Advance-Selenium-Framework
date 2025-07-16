@@ -1,16 +1,6 @@
 package product;
 
-import java.io.FileInputStream;
-import java.util.Properties;
-import java.util.Random;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -27,69 +17,71 @@ import Pom_Repo.ProductLookUpImg;
 
 public class CreateAndDeleteProduct {
 
-	public static void main(String[] args) throws Throwable 
-	{
-		File_Utility flib = new File_Utility();
-		 String BROWSER = flib.getKeyAndValue("browser");
-       String URL = flib.getKeyAndValue("url");
-       String USERNAME = flib.getKeyAndValue("username");
-       String PASSWORD = flib.getKeyAndValue("password");
+    public static void main(String[] args) throws Throwable {
 
-		WebDriver driver;
+        // Load properties
+        File_Utility fLib = new File_Utility();
+        String BROWSER = fLib.getKeyAndValue("browser");
+        String URL = fLib.getKeyAndValue("url");
+        String USERNAME = fLib.getKeyAndValue("username");
+        String PASSWORD = fLib.getKeyAndValue("password");
 
-		if(BROWSER.equalsIgnoreCase("chrome")) {
-			driver = new ChromeDriver();
-		}
-		else if(BROWSER.equalsIgnoreCase("edge")) {
-			driver = new EdgeDriver();
-		}
-		else if(BROWSER.equalsIgnoreCase("firefox")) {
-			driver = new FirefoxDriver();
-		}
-		else {
-			driver = new ChromeDriver();
-		}
+        // Launch browser
+        WebDriver driver;
+        if (BROWSER.equalsIgnoreCase("chrome")) {
+            driver = new ChromeDriver();
+        } else if (BROWSER.equalsIgnoreCase("edge")) {
+            driver = new EdgeDriver();
+        } else if (BROWSER.equalsIgnoreCase("firefox")) {
+            driver = new FirefoxDriver();
+        } else {
+            driver = new ChromeDriver();
+        }
 
-		 WebDriver_Utility Wutil = new WebDriver_Utility();
-	        Wutil.maximizeWindow(driver);
-		driver.get(URL);
+        WebDriver_Utility wUtil = new WebDriver_Utility();
+        wUtil.maximizeWindow(driver);
+        driver.get(URL);
 
-		// LOGIN TO VTIGER
-		 LoginPage login = new LoginPage(driver);
-         login.getUserTextField().sendKeys(USERNAME);
-         login.getPasswordTextField().sendKeys(PASSWORD);
-         login.getLoginButton().click();
-         
-         // click on product link
-         HomePage home = new HomePage(driver);
-         home.clickProductLink();
+        // Login to Vtiger
+        LoginPage login = new LoginPage(driver);
+        login.getUserTextField().sendKeys(USERNAME);
+        login.getPasswordTextField().sendKeys(PASSWORD);
+        login.getLoginButton().click();
 
-         // click on create product lookup image
-         ProductLookUpImg lookUp = new ProductLookUpImg(driver);
-         lookUp.clickPrdLookUp();
+        // Navigate to Product
+        HomePage home = new HomePage(driver);
+        home.clickProductLink();
 
-		 Java_Utility jlib = new Java_Utility();
-	     int rannum = jlib.getRandomNum();
-	     Excel_Utility eUtil = new Excel_Utility();
-	     String prdName = eUtil.getExcelData("Product", 0, 0) + rannum;
+        // Click on + (create product)
+        ProductLookUpImg lookUp = new ProductLookUpImg(driver);
+        lookUp.clickPrdLookUp();
 
-		 // Enter product name and save
-	     CreateProductPage prdPage = new CreateProductPage(driver);
-	     prdPage.enterPrdData(prdName);
+        // Read data
+        Java_Utility jLib = new Java_Utility();
+        int randNum = jLib.getRandomNum();
 
-		// Go back to Products list
-		home.clickProductLink();
-		// Find the row of the created product and click its checkbox
-		DeleteProductPage deletePrd = new DeleteProductPage(driver);
-		deletePrd.selectprdCheckBox(driver, prdName);
-		// Click delete and accept alert
-		deletePrd.clickDeleteButton();
-		Wutil.alerthandle(driver);
-		Wutil.Refreshpage(driver);
-		// Try to find the deleted product again
-		deletePrd.validatePrdDeleted(driver, prdName);
-		// logout from application
-		home.logoutApp();
-		driver.quit(); 
-	}
+        Excel_Utility eUtil = new Excel_Utility();
+        String prdName = eUtil.getExcelData("Product", 0, 0) + randNum;
+
+        // Create product
+        CreateProductPage prdPage = new CreateProductPage(driver);
+        prdPage.enterPrdData(driver, prdName); // ✅ updated to pass WebDriver
+
+        // Navigate back to Product list
+        home.clickProductLink();
+
+        // Select created product and delete
+        DeleteProductPage deletePrd = new DeleteProductPage(driver);
+        deletePrd.selectprdCheckBox(driver, prdName);
+        deletePrd.clickDeleteButton();
+        wUtil.alerthandle(driver);
+        wUtil.Refreshpage(driver);
+
+        // Validate deletion
+        deletePrd.validatePrdDeleted(driver, prdName);
+
+        // Logout
+        home.logoutApp();
+        driver.quit();
+    }
 }
